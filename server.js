@@ -1,6 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const dns = require("dns");
+const { log } = require("console");
 const app = express();
 
 // Basic Configuration
@@ -16,43 +18,37 @@ app.get("/", function (req, res) {
   res.sendFile(process.cwd() + "/views/index.html");
 });
 
-const urlValid = [
-  { original_url: "https://freeCodeCamp.org/", short_url: 1 },
-  { original_url: "https://google.com.pe/", short_url: 2 },
-];
-
-function seachrUrl(url = "") {
-  return urlValid.findIndex((findurl) => findurl.original_url == url);
-}
+const urlValid = [];
 
 app.post(
   "/api/shorturl",
   (req, res, next) => {
     //validamos que exista la url
     let urlParam = req.body.url;
-    console.log(urlParam);
-    let searchUrl = seachrUrl(urlParam);
-    if (searchUrl >= 0) {
-      next();
-    } else {
-      res.json({ error: "invalid url" });
-    }
-
-
-  
-
+    dns.lookup(urlParam, (err, address, family) => {
+      if (err) {
+        res.json(err);
+        res.json({ error: "invalid url" });
+      } else {
+        next();
+      }
+    });
   },
   (req, res) => {
     let url = req.body.url;
-    let objurl = urlValid[seachrUrl(url)];
-    res.json(objurl);
+    let obj = {
+      original_url: url, short_url: (urlValid.length + 1)
+    }
+    urlValid.push(obj);
+    res.json(obj);
   }
 );
 
 app.get("/api/shorturl/:short_url", (req, res) => {
-  console.log(req.params.short_url);
   let obj = urlValid.find((urlS) => urlS.short_url == req.params.short_url);
-  res.redirect(obj.original_url);
+  console.log("Busqueda:");
+  console.log(obj);
+  res.redirect('https://' + obj.original_url);
 });
 
 app.listen(port, function () {
