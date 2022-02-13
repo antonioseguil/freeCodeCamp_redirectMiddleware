@@ -17,8 +17,8 @@ app.get("/", function (req, res) {
 });
 
 const urlValid = [
-  { original_url: "https://freeCodeCamp.org", short_url: 1 },
-  { original_url: "https://google.com.pe", short_url: 2 },
+  { original_url: "https://freeCodeCamp.org/", short_url: 1 },
+  { original_url: "https://google.com.pe/", short_url: 2 },
 ];
 
 function seachrUrl(url = "") {
@@ -30,6 +30,7 @@ app.post(
   (req, res, next) => {
     //validamos que exista la url
     let urlParam = req.body.url;
+    console.log(urlParam);
     let searchUrl = seachrUrl(urlParam);
     if (searchUrl >= 0) {
       next();
