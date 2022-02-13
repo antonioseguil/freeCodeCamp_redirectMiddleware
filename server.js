@@ -37,6 +37,10 @@ app.post(
     } else {
       res.json({ error: "invalid url" });
     }
+
+
+  
+
   },
   (req, res) => {
     let url = req.body.url;
@@ -46,6 +50,7 @@ app.post(
 );
 
 app.get("/api/shorturl/:short_url", (req, res) => {
+  console.log(req.params.short_url);
   let obj = urlValid.find((urlS) => urlS.short_url == req.params.short_url);
   res.redirect(obj.original_url);
 });
