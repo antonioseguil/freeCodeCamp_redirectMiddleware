@@ -14,19 +14,27 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/public", express.static(`${process.cwd()}/public`));
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
   res.sendFile(process.cwd() + "/views/index.html");
 });
 
 const urlValid = [];
 
+function parseUrl(url = "") {
+  let parseUrl = url.replace('https://', '');
+  let index = parseUrl.indexOf('?');
+  if (index >= 0) {
+    parseUrl = parseUrl.substring(0, (index - 1));
+  }
+
+  return parseUrl;
+}
+
 app.post(
   "/api/shorturl",
   (req, res, next) => {
     //validamos que exista la url
-    let urlParam = req.body.url.replace('https://','');
-    console.log("url enviada");
-    console.log(urlParam);
+    let urlParam = parseUrl(req.body.url);
     dns.lookup(urlParam, (err, address, family) => {
       if (err) {
         res.json({ error: "invalid url" });
@@ -54,6 +62,6 @@ app.get("/api/shorturl/:short_url", (req, res) => {
   res.redirect(obj.original_url);
 });
 
-app.listen(port, function() {
+app.listen(port, function () {
   console.log(`Listening on port ${port}`);
 });
